@@ -1,0 +1,14 @@
+# Node modules
+node_modules/
+
+# SQLite database file
+database.sqlite
+
+# Environment variables
+.env
+
+# VSCode settings
+.vscode/
+
+# Uploaded files
+uploads/
