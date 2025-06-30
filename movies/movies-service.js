@@ -1,7 +1,8 @@
 import { Movie } from "../models/movie.js";
 import { Actor } from "../models/actor.js";
 import { HttpError } from "../classes/http-error.js";
-import { Op } from "sequelize";
+import fs from "fs/promises";
+import { Op, fn, col } from "sequelize";
 
 class MoviesService {
   async createMovie(data) {
@@ -67,7 +68,7 @@ class MoviesService {
         where: Object.keys(actorWhere).length ? actorWhere : undefined,
         attributes: ["name"],
       },
-      order: [[sort, order]],
+      order: [[fn("LOWER", col("title")), order]], // to retrun based on title case-insensitive
       limit: parseInt(limit),
       offset: parseInt(offset),
     });
@@ -77,6 +78,7 @@ class MoviesService {
         query: "NO_MOVIES",
       });
     }
+
     return movies;
   }
 
@@ -132,7 +134,9 @@ class MoviesService {
       for (const block of blocks) {
         const lines = block.split("\n").map((line) => line.trim());
         if (lines.length < 4) {
-          throw new HttpError("Invalid block format", 400);
+          throw new HttpError("Invalid block format", 400, "BAD_REQUEST", {
+            block: "INVALID_BLOCK",
+          });
         }
 
         const title = lines[0]?.replace(/^Title:\s*/, "");
@@ -144,7 +148,7 @@ class MoviesService {
           .map((a) => a.trim());
 
         if (!title || !year || !format || !stars || stars.length === 0) {
-          throw new HttpError("Missing movie fields", 400);
+          throw new HttpError("Missing movie fields", 400, "BAD_REQUEST");
         }
 
         const movie = await Movie.create({ title, year, format });

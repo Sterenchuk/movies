@@ -43,7 +43,7 @@ class MovieValidator {
       );
     }
 
-    if (!regex.title.test(title)) {
+    if (!regex.title.test(title) || title.trim() === "") {
       throw new HttpError("Invalid title format", 400, "TITLE_INVALID", {
         title: "NOT_VALID",
       });
