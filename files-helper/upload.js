@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { HttpError } from "../classes/http-error.js";
 
 const uploadDir = "./uploads";
 if (!fs.existsSync(uploadDir)) {
@@ -20,7 +21,11 @@ export const upload = multer({
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     if (ext !== ".txt") {
-      return cb(new Error("Only .txt files are allowed"));
+      return cb(
+        new HttpError("Only .txt files are allowed", 415, "BAD_REQUEST", {
+          file: file.originalname,
+        })
+      );
     }
     cb(null, true);
   },
